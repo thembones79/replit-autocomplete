@@ -1,25 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+import AutoComplete from "./components/AutoComplete";
+import { getData } from "./actions";
+
+const App = (props) => {
+  const { isLoading, getData, error, data } = props;
+  if (error) {
+    return <div>{error.message}</div>;
+  }
+
+  const usernames = data.map((user) => user.username);
+
+  useEffect(() => {
+    getData("https://jsonplaceholder.typicode.com/users");
+  }, []);
+
+  return isLoading ? (
+    <h1>Loading...</h1>
+  ) : (
+    <div className="app">
+      <AutoComplete suggestions={usernames} />
     </div>
   );
-}
+};
 
-export default App;
+const mapStateToProps = (state) => {
+  const { isLoading, data, error } = state.getDataReducer;
+  return {
+    isLoading,
+    error,
+    data,
+  };
+};
+
+export default connect(mapStateToProps, {
+  getData,
+})(App);
